@@ -13,11 +13,20 @@ const SensitivityPanel: FC = () => {
   const [bText, setBText] = useState("4 12 18");
   const { data, loading, error, run } = useSolver(api.sensitivity);
 
-  const toList   = (t: string) => t.trim().split(/[\s,;]+/).map(Number);
+  const toList = (t: string) => t.trim().split(/[\s,;]+/).map(Number);
   const toMatrix = (t: string) => t.trim().split("\n").map(r => r.trim().split(/[\s,;]+/).map(Number));
 
   const solve = () => run({ c: toList(cText), A: toMatrix(AText), b: toList(bText) });
+  const fmt = (v: number | null) => {
+    if (v === null || v === undefined) return "∞";
+    if (!Number.isFinite(v)) return "∞";
+    return Number(v).toFixed(4);
+  };
 
+  const amplitude = (low: number | null, high: number | null) => {
+    if (low === null || high === null) return "∞";
+    return (high - low).toFixed(4);
+  };
   return (
     <div>
       <div className="section-title">Análisis de Sensibilidad</div>
@@ -77,9 +86,9 @@ const SensitivityPanel: FC = () => {
                     <td>{r.current}</td>
                     <td>{r.x_val}</td>
                     <td><span className={`tag ${r.in_basis ? "tag-green" : "tag-orange"}`}>{r.in_basis ? "Sí" : "No"}</span></td>
-                    <td>{r.range_low}</td>
-                    <td>{r.range_high}</td>
-                    <td>{(r.range_high - r.range_low).toFixed(4)}</td>
+                    <td>{fmt(r.range_low)}</td>
+                    <td>{fmt(r.range_high)}</td>
+                    <td>{amplitude(r.range_low, r.range_high)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -97,8 +106,8 @@ const SensitivityPanel: FC = () => {
                   <tr key={i}>
                     <td className="highlight">{r.constraint}</td>
                     <td>{r.current}</td>
-                    <td>{r.range_low}</td>
-                    <td>{r.range_high}</td>
+                    <td>{fmt(r.range_low)}</td>
+                    <td>{fmt(r.range_high)}</td>
                     <td style={{ color: "#dfaa4a" }}>{r.shadow_price}</td>
                   </tr>
                 ))}
